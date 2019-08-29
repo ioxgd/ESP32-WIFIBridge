@@ -33,6 +33,10 @@ bool CommandProcess(uint8_t cmd, uint8_t data) {
       res = TCPWrite(data);
       break;
 
+    case 0x20: // HTTP Request
+      res = HTTPRequest(data);
+      break;
+
     default: // unknow command
       res = true;
       
