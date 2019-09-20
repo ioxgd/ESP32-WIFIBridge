@@ -1,15 +1,48 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-void setup() {
+#define WIFI_LED_PIN 2
+
+uint8_t WiFiStatus = 0;
+void LEDWiFi_Task(void *p){
+  pinMode(WIFI_LED_PIN, OUTPUT);
   
+  while(1) {
+    if (WiFiStatus == 0) {
+      digitalWrite(WIFI_LED_PIN, LOW);
+    } else if (WiFiStatus == 1) {
+      digitalWrite(WIFI_LED_PIN, !digitalRead(WIFI_LED_PIN));
+    } else if (WiFiStatus == 2) {
+      digitalWrite(WIFI_LED_PIN, HIGH);
+    }
+    delay(100);
+  }
+}
+
+void setup() {
+
   Serial.begin(115200);
   Serial.println("Start !");
 
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  delay(100);
+
+  WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+    WiFiStatus = 1;
+  }, WiFiEvent_t::SYSTEM_EVENT_STA_START);
+
+  WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+    WiFiStatus = 2;
+  }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
   
+  WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+    WiFiStatus = 1;
+  }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
+
+  xTaskCreate(&LEDWiFi_Task, "LEDWiFi_Task", 1024, NULL, 10, NULL);
+
+  delay(100);
+
   Serial1.begin(512000, SERIAL_8N1, 25, 27);
 }
 
