@@ -1,5 +1,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <Update.h>
+#include "time.h"
 
 #define WIFI_LED_PIN 2
 
@@ -44,6 +46,7 @@ void setup() {
   delay(100);
 
   Serial1.begin(512000, SERIAL_8N1, 25, 27);
+  Serial1.setTimeout(200);
 }
 
 uint8_t state = 0;

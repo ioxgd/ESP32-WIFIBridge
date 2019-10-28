@@ -37,6 +37,17 @@ bool CommandProcess(uint8_t cmd, uint8_t data) {
       res = HTTPRequest(data);
       break;
 
+    case 0x30: // NTP Config
+      res = NTPConfig(data);
+      break;
+    case 0x31: // Get Time
+      res = NTPGetTime(data);
+      break;
+
+    case 0xFF: // Update via Serial
+      res = UpdateViaSerial(data);
+      break;
+
     default: // unknow command
       res = true;
       
