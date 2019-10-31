@@ -3,7 +3,7 @@
 #include <Update.h>
 #include "time.h"
 
-#define WIFI_LED_PIN 2
+#define WIFI_LED_PIN 12
 
 uint8_t WiFiStatus = 0;
 void LEDWiFi_Task(void *p){

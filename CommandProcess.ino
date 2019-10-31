@@ -40,7 +40,7 @@ bool CommandProcess(uint8_t cmd, uint8_t data) {
     case 0x30: // NTP Config
       res = NTPConfig(data);
       break;
-    case 0x31: // Get Time
+    case 0x31: // NTP Get Time
       res = NTPGetTime(data);
       break;
 
