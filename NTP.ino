@@ -20,7 +20,7 @@ bool NTPGetTime(uint8_t data) {
   Serial1.write(timeinfo.tm_min);
   Serial1.write(timeinfo.tm_sec);
   Serial1.write(timeinfo.tm_mday);
-  Serial1.write(timeinfo.tm_mon);
+  Serial1.write(timeinfo.tm_mon + 1);
   Serial1.write(timeinfo.tm_year);
   Serial1.write(timeinfo.tm_wday);
   Serial1.write(timeinfo.tm_yday);
