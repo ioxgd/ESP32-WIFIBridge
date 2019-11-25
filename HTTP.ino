@@ -28,7 +28,7 @@ bool HTTPRequest(uint8_t data) {
   } else if (state == 2) {
     method = data;
     state = 3;
-  // Payload
+    // Payload
   } else if (state == 3) {
     payload_len = data;
     payload = "";
@@ -41,7 +41,7 @@ bool HTTPRequest(uint8_t data) {
     if (payload_len <= 0) {
       state = 5;
     }
-  // Add Header
+    // Add Header
   } else if (state == 5) {
     headerCount = data;
     if (headerCount == 0) {
@@ -82,7 +82,7 @@ bool HTTPRequest(uint8_t data) {
 
     WiFiClientSecure *client;
     HTTPClient http;
-    
+
     if (url.startsWith("https")) {
       client = new WiFiClientSecure;
       http.begin(*client, url);
@@ -90,10 +90,10 @@ bool HTTPRequest(uint8_t data) {
       http.begin(url);
     }
 
-    for (int i=0;i<headerCount;i++) {
+    for (int i = 0; i < headerCount; i++) {
       http.addHeader(headerName[i], headerValue[i]);
     }
-    
+
     uint16_t httpCode;
     if (method == 0) {
       httpCode = http.GET();
@@ -106,11 +106,46 @@ bool HTTPRequest(uint8_t data) {
     }
     Serial1.write((uint8_t)httpCode >> 8);
     Serial1.write((uint8_t)httpCode & 0xFF);
-    String rosPayload = http.getString();
-    uint16_t rosPayload_len = rosPayload.length();
-    Serial1.write((uint8_t)rosPayload_len >> 8);
-    Serial1.write((uint8_t)rosPayload_len & 0xFF);
-    Serial1.print(rosPayload);
+
+    //    String rosPayload = http.getString();
+    //    uint16_t rosPayload_len = rosPayload.length();
+    //    Serial1.write((uint8_t)rosPayload_len >> 8);
+    //    Serial1.write((uint8_t)rosPayload_len & 0xFF);
+    //    Serial1.print(rosPayload);
+
+    uint16_t rosPayload_len = http.getSize();
+//    Serial.print("Payload: ");
+//    Serial.println(rosPayload_len);
+    if (rosPayload_len == -1) {
+      String rosPayload = http.getString();
+      rosPayload_len = rosPayload.length();
+      Serial1.write((uint8_t)(rosPayload_len >> 8));
+      Serial1.write((uint8_t)(rosPayload_len & 0xFF));
+      Serial1.print(rosPayload);
+    } else {
+      Serial1.write((uint8_t)(rosPayload_len >> 8));
+      Serial1.write((uint8_t)(rosPayload_len & 0xFF));
+
+      uint8_t buff[128];
+      WiFiClient * stream = http.getStreamPtr();
+
+      while (http.connected() && rosPayload_len > 0) {
+        size_t size = stream->available();
+        if (size > 0) {
+          int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+          Serial1.write(buff, c);
+          // Serial.print("Start write ");
+          // Serial.println(c);
+          // while (Serial1.availableForWrite() > 0) delay(0);
+          if (rosPayload_len > 0) {
+            rosPayload_len -= c;
+          }
+          // Serial.print("writed ");
+          // Serial.println(c);
+        }
+        delay(1);
+      }
+    }
     http.end();
     state = 0;
     res = true;

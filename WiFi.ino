@@ -89,3 +89,15 @@ bool CheckConnect(uint8_t data) {
 
   return true;
 }
+
+bool CheckIP(uint8_t data) {
+  Serial1.write(0x1F);
+  Serial1.write(0xF1);
+  Serial1.write(0x04); // Get Local IP response
+  
+  IPAddress ip = WiFi.localIP();
+  Serial1.write(ip[0]);
+  Serial1.write(ip[1]);
+  Serial1.write(ip[2]);
+  Serial1.write(ip[3]);
+}

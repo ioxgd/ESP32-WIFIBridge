@@ -13,6 +13,9 @@ bool CommandProcess(uint8_t cmd, uint8_t data) {
     case 0x03: // Check Connect
       res = CheckConnect(data);
       break;
+    case 0x04: // Get Local IP
+      res = CheckIP(data);
+      break;
       
     case 0x10: // Connect to Server
       res = TCPConnect(data);
@@ -33,6 +36,16 @@ bool CommandProcess(uint8_t cmd, uint8_t data) {
       res = TCPWrite(data);
       break;
 
+    case 0x16: // UDP begin
+      res = UDPBegin(data);
+      break;
+    case 0x17: // UDP Send a packet
+      res = UDPSend(data);
+      break;
+    case 0x18: // UDP Receive
+      res = UDPReceive(data);
+      break;
+
     case 0x20: // HTTP Request
       res = HTTPRequest(data);
       break;
@@ -42,6 +55,19 @@ bool CommandProcess(uint8_t cmd, uint8_t data) {
       break;
     case 0x31: // NTP Get Time
       res = NTPGetTime(data);
+      break;
+
+    case 0x40: // Bluetooth Serial begin
+      res = BTSerialBegin(data);
+      break;
+    case 0x41: // Bluetooth Serial available
+      res = BTSerialAvailable(data);
+      break;
+    case 0x42: // Bluetooth Serial read
+      res = BTSerialRead(data);
+      break;
+    case 0x43: // Bluetooth Serial write
+      res = BTSerialWrite(data);
       break;
 
     case 0xFF: // Update via Serial

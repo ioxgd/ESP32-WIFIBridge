@@ -1,7 +1,9 @@
 #include <WiFi.h>
+#include <WiFiUdp.h>
 #include <HTTPClient.h>
 #include <Update.h>
 #include "time.h"
+#include "BluetoothSerial.h"
 
 #define WIFI_LED_PIN 12
 
