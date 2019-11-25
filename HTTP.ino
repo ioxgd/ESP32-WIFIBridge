@@ -103,6 +103,8 @@ bool HTTPRequest(uint8_t data) {
       httpCode = http.POST(payload);
     } else if (method == 3) {
       httpCode = http.PUT(payload);
+    } else if (method == 4) {
+      httpCode = http.sendRequest("DELETE", payload);
     }
     Serial1.write((uint8_t)httpCode >> 8);
     Serial1.write((uint8_t)httpCode & 0xFF);
