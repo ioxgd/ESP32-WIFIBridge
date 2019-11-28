@@ -34,6 +34,8 @@ bool HTTPRequest(uint8_t data) {
     payload = "";
     if (payload_len <= 0) {
       state = 5;
+    } else {
+      state = 4;
     }
   } else if (state == 4) {
     payload += (char)data;
@@ -63,7 +65,7 @@ bool HTTPRequest(uint8_t data) {
   } else if (state == 8) {
     headerValueLen = data;
     headerValue[headerInx] = "";
-    state = 7;
+    state = 9;
   } else if (state == 9) {
     headerValue[headerInx] += (char)data;
     headerValueLen--;
@@ -79,6 +81,8 @@ bool HTTPRequest(uint8_t data) {
     Serial1.write(0x1F);
     Serial1.write(0xF1);
     Serial1.write(0x20); // HTTP Request response
+
+    // Serial.println("Start http");
 
     WiFiClientSecure *client;
     HTTPClient http;
@@ -106,8 +110,8 @@ bool HTTPRequest(uint8_t data) {
     } else if (method == 4) {
       httpCode = http.sendRequest("DELETE", payload);
     }
-    Serial1.write((uint8_t)httpCode >> 8);
-    Serial1.write((uint8_t)httpCode & 0xFF);
+    Serial1.write((uint8_t)(httpCode >> 8));
+    Serial1.write((uint8_t)(httpCode & 0xFF));
 
     //    String rosPayload = http.getString();
     //    uint16_t rosPayload_len = rosPayload.length();
@@ -115,15 +119,33 @@ bool HTTPRequest(uint8_t data) {
     //    Serial1.write((uint8_t)rosPayload_len & 0xFF);
     //    Serial1.print(rosPayload);
 
-    uint16_t rosPayload_len = http.getSize();
-//    Serial.print("Payload: ");
-//    Serial.println(rosPayload_len);
+    int rosPayload_len = http.getSize();
+    // Serial.print("Payload: ");
+    // Serial.println(rosPayload_len);
     if (rosPayload_len == -1) {
       String rosPayload = http.getString();
       rosPayload_len = rosPayload.length();
       Serial1.write((uint8_t)(rosPayload_len >> 8));
       Serial1.write((uint8_t)(rosPayload_len & 0xFF));
       Serial1.print(rosPayload);
+      /*
+      WiFiClient * stream = http.getStreamPtr();
+
+      String rosPayload = "";
+      while (http.connected()) {
+        if (stream->available() > 0) {
+          rosPayload += (char)stream->read();
+        } else {
+          delay(1);
+        }
+      }
+      rosPayload_len = rosPayload.length();
+      Serial1.write((uint8_t)(rosPayload_len >> 8));
+      Serial1.write((uint8_t)(rosPayload_len & 0xFF));
+      Serial1.print(rosPayload);
+      */
+      // Serial.print("Payload: ");
+      // Serial.println(rosPayload_len);
     } else {
       Serial1.write((uint8_t)(rosPayload_len >> 8));
       Serial1.write((uint8_t)(rosPayload_len & 0xFF));
@@ -149,9 +171,12 @@ bool HTTPRequest(uint8_t data) {
       }
     }
     http.end();
+    // Serial.println("END of HTTP");
     state = 0;
     res = true;
   }
+  // Serial.print("Next state: ");
+  // Serial.println(state);
 
   return res;
 }
