@@ -12,7 +12,7 @@ bool TCPConnect(uint8_t data) {
   static uint16_t port = 80;
 
   if (state == 0) {
-    socket_id = (data > 2 ? 2 : socket_id);
+    socket_id = (data > 2 ? 2 : data);
     state = 1;
   } else if (state == 1) {
     host_type = data;
@@ -54,7 +54,7 @@ bool TCPConnect(uint8_t data) {
 }
 
 bool TCPConnected(uint8_t data) {
-  uint8_t socket_id = (data > 2 ? 2 : socket_id);
+  uint8_t socket_id = (data > 2 ? 2 : data);
 
   Serial1.write(0x1F);
   Serial1.write(0xF1);
@@ -65,7 +65,7 @@ bool TCPConnected(uint8_t data) {
 }
 
 bool TCPStop(uint8_t data) {
-  uint8_t socket_id = (data > 2 ? 2 : socket_id);
+  uint8_t socket_id = (data > 2 ? 2 : data);
 
   Serial1.write(0x1F);
   Serial1.write(0xF1);
@@ -76,7 +76,7 @@ bool TCPStop(uint8_t data) {
 }
 
 bool TCPAvailable(uint8_t data) {
-  uint8_t socket_id = (data > 2 ? 2 : socket_id);
+  uint8_t socket_id = (data > 2 ? 2 : data);
 
   Serial1.write(0x1F);
   Serial1.write(0xF1);
@@ -96,24 +96,25 @@ bool TCPRead(uint8_t data) {
   static uint16_t size = 0;
 
   if (state == 0) {
-    socket_id = (data > 2 ? 2 : socket_id);
+    socket_id = (data > 2 ? 2 : data);
     state = 1;
   } else if (state == 1) {
     size = data << 8;
     state = 2;
   } else if (state == 2) {
     size |= data;
-    state = 3;
-  } else if (state == 3) {
+
     Serial1.write(0x1F);
     Serial1.write(0xF1);
     Serial1.write(0x14); // TCP Read response
+    /*
     uint16_t realSize = client[socket_id].available();
     if (size > realSize) {
       size = realSize;
     }
     Serial1.write((uint8_t)(size >> 8));
     Serial1.write((uint8_t)(size & 0xFF));
+    */
     for (uint16_t i=0;i<size;i++) {
       Serial1.write(client[socket_id].read());
     }
@@ -133,9 +134,10 @@ bool TCPWrite(uint8_t data) {
   static uint16_t size = 0;
 
   if (state == 0) {
-    socket_id = (data > 2 ? 2 : socket_id);
+    socket_id = (data > 2 ? 2 : data);
     state = 1;
   } else if (state == 1) {
+    size = 0;
     size = data << 8;
     state = 2;
   } else if (state == 2) {
