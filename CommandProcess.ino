@@ -45,6 +45,26 @@ bool CommandProcess(uint8_t cmd, uint8_t data) {
     case 0x18: // UDP Receive
       res = UDPReceive(data);
       break;
+/*
+    case 0x17: // UDP Begin Packet
+      res = UDPBeginPacket(data);
+      break;
+    case 0x18: // UDP End Packet
+      res = UDPEndPacket(data);
+      break;
+    case 0x19: // UDP Write
+      res = UDPWrite(data);
+      break;
+    case 0x1A: // UDP Parse Packet
+      res = UDPParsePacket(data);
+      break;
+    case 0x1B: // UDP Available
+      res = UDPAvailable(data);
+      break;
+    case 0x1C: // UDP read
+      res = UDPRead(data);
+      break;
+    */
 
     case 0x20: // HTTP Request
       res = HTTPRequest(data);
