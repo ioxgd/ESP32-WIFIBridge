@@ -20,6 +20,7 @@ bool TCPConnect(uint8_t data) {
   } else if (state == 2) {
     host_len = data;
     memset(host, 0, 64);
+    host_inx = 0;
     state = 3;
   } else if (state == 3) {
     host[host_inx++] = data;
@@ -27,6 +28,7 @@ bool TCPConnect(uint8_t data) {
       state = 4;
     }
   } else if (state == 4) {
+    port = 0;
     port = data << 8;
     state = 5;
   } else if (state == 5) {
@@ -37,13 +39,13 @@ bool TCPConnect(uint8_t data) {
     Serial1.write(0xF1);
     Serial1.write(0x10); // Connect to Server response
 
+    int connectCode = 0x00;
     if (host_type == 1) { // Connect by IP
-      Serial1.write(client[socket_id].connect(IPAddress(host[0], host[1], host[2], host[3]), port) ? 0x01 : 0x00);
+      connectCode = client[socket_id].connect(IPAddress(host[0], host[1], host[2], host[3]), port);
     } else if (host_type == 2) { // Connect by Hostname
-      Serial1.write(client[socket_id].connect(host, port) ? 0x01 : 0x00);
-    } else {
-      Serial1.write(0x00);
+      connectCode = client[socket_id].connect((char*)host, port);
     }
+    Serial1.write(connectCode == 1 ? 0x01 : 0x00);
 
     state = 0;
 
